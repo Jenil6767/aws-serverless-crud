@@ -1,0 +1,255 @@
+{
+  "C:\\Users\\ADMIN\\Documents\\User_CRUD_Microservice_Serverless_Jenil\\backend\\serverless.yml": {
+    "versionFramework": "4.29.0",
+    "servicePath": "C:\\Users\\ADMIN\\Documents\\User_CRUD_Microservice_Serverless_Jenil\\backend\\serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "user-crud-api",
+      "frameworkVersion": "4",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs18.x",
+        "region": "us-east-1",
+        "stage": "dev",
+        "memorySize": 256,
+        "timeout": 30,
+        "environment": {
+          "USERS_TABLE": "${self:service}-${self:provider.stage}-users",
+          "STAGE": "${self:provider.stage}"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:Query",
+                  "dynamodb:Scan",
+                  "dynamodb:GetItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:UpdateItem",
+                  "dynamodb:DeleteItem"
+                ],
+                "Resource": [
+                  "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}",
+                  "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}/index/*"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "plugins": [
+        "serverless-offline"
+      ],
+      "custom": {
+        "serverless-offline": {
+          "httpPort": 3000,
+          "noPrependStageInUrl": true,
+          "cors": {
+            "origin": "*",
+            "headers": [
+              "Content-Type",
+              "X-Amz-Date",
+              "Authorization",
+              "X-Api-Key",
+              "X-Amz-Security-Token"
+            ]
+          }
+        }
+      },
+      "functions": {
+        "createUser": {
+          "handler": "src/handlers/createUser.handler",
+          "events": [
+            {
+              "http": {
+                "path": "users",
+                "method": "post",
+                "cors": true
+              }
+            }
+          ]
+        },
+        "getUser": {
+          "handler": "src/handlers/getUser.handler",
+          "events": [
+            {
+              "http": {
+                "path": "users/{UserID}",
+                "method": "get",
+                "cors": true
+              }
+            }
+          ]
+        },
+        "listUsers": {
+          "handler": "src/handlers/listUsers.handler",
+          "events": [
+            {
+              "http": {
+                "path": "users",
+                "method": "get",
+                "cors": true
+              }
+            }
+          ]
+        },
+        "updateUser": {
+          "handler": "src/handlers/updateUser.handler",
+          "events": [
+            {
+              "http": {
+                "path": "users/{UserID}",
+                "method": "put",
+                "cors": true
+              }
+            }
+          ]
+        },
+        "deleteUser": {
+          "handler": "src/handlers/deleteUser.handler",
+          "events": [
+            {
+              "http": {
+                "path": "users/{UserID}",
+                "method": "delete",
+                "cors": true
+              }
+            }
+          ]
+        }
+      },
+      "resources": {
+        "Resources": {
+          "UsersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "${self:provider.environment.USERS_TABLE}",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "UserID",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "Email",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "UserID",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "EmailIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "Email",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          }
+        }
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "region": "us-east-1",
+      "stage": "dev",
+      "memorySize": 256,
+      "timeout": 30,
+      "environment": {
+        "USERS_TABLE": "${self:service}-${self:provider.stage}-users",
+        "STAGE": "${self:provider.stage}"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}",
+                "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}/index/*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "error": {
+      "message": "Unable to reach the Serverless API (fetch failed; Connect Timeout Error (attempted addresses: 34.199.225.223:443, 52.71.106.82:443, timeout: 10000ms); code: UND_ERR_CONNECT_TIMEOUT).\nPlease verify your network connection and try again.",
+      "code": "AUTH_FAILED"
+    },
+    "serviceRawFile": "service: user-crud-api\r\n\r\nframeworkVersion: '4'\r\n\r\nprovider:\r\n  name: aws\r\n  runtime: nodejs18.x\r\n  region: us-east-1\r\n  stage: ${opt:stage, 'dev'}\r\n  memorySize: 256\r\n  timeout: 30\r\n  environment:\r\n    USERS_TABLE: ${self:service}-${self:provider.stage}-users\r\n    STAGE: ${self:provider.stage}\r\n  iam:\r\n    role:\r\n      statements:\r\n        - Effect: Allow\r\n          Action:\r\n            - dynamodb:Query\r\n            - dynamodb:Scan\r\n            - dynamodb:GetItem\r\n            - dynamodb:PutItem\r\n            - dynamodb:UpdateItem\r\n            - dynamodb:DeleteItem\r\n          Resource:\r\n            - \"arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}\"\r\n            - \"arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}/index/*\"\r\n\r\nplugins:\r\n  - serverless-offline\r\n\r\ncustom:\r\n  serverless-offline:\r\n    httpPort: 3000\r\n    noPrependStageInUrl: true  # Remove /dev prefix for local development\r\n    cors:\r\n      origin: '*'\r\n      headers:\r\n        - Content-Type\r\n        - X-Amz-Date\r\n        - Authorization\r\n        - X-Api-Key\r\n        - X-Amz-Security-Token\r\n\r\nfunctions:\r\n  createUser:\r\n    handler: src/handlers/createUser.handler\r\n    events:\r\n      - http:\r\n          path: users\r\n          method: post\r\n          cors: true\r\n\r\n  getUser:\r\n    handler: src/handlers/getUser.handler\r\n    events:\r\n      - http:\r\n          path: users/{UserID}\r\n          method: get\r\n          cors: true\r\n\r\n  listUsers:\r\n    handler: src/handlers/listUsers.handler\r\n    events:\r\n      - http:\r\n          path: users\r\n          method: get\r\n          cors: true\r\n\r\n  updateUser:\r\n    handler: src/handlers/updateUser.handler\r\n    events:\r\n      - http:\r\n          path: users/{UserID}\r\n          method: put\r\n          cors: true\r\n\r\n  deleteUser:\r\n    handler: src/handlers/deleteUser.handler\r\n    events:\r\n      - http:\r\n          path: users/{UserID}\r\n          method: delete\r\n          cors: true\r\n\r\nresources:\r\n  Resources:\r\n    UsersTable:\r\n      Type: AWS::DynamoDB::Table\r\n      Properties:\r\n        TableName: ${self:provider.environment.USERS_TABLE}\r\n        AttributeDefinitions:\r\n          - AttributeName: UserID\r\n            AttributeType: S\r\n          - AttributeName: Email\r\n            AttributeType: S\r\n        KeySchema:\r\n          - AttributeName: UserID\r\n            KeyType: HASH\r\n        GlobalSecondaryIndexes:\r\n          - IndexName: EmailIndex\r\n            KeySchema:\r\n              - AttributeName: Email\r\n                KeyType: HASH\r\n            Projection:\r\n              ProjectionType: ALL\r\n        BillingMode: PAY_PER_REQUEST\r\n",
+    "command": [
+      "offline"
+    ],
+    "options": {},
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:810731469208:stack/user-crud-api-dev/a0fe1ee0-e2d7-11f0-9a46-0affc62d11db",
+    "serviceProviderAwsCfStackCreated": "2025-12-27T03:53:39.674Z",
+    "serviceProviderAwsCfStackUpdated": "2025-12-27T10:04:22.761Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "DeleteUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:810731469208:function:user-crud-api-dev-deleteUser:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-user-crud-api-dev-DeleteUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ListUsersLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:810731469208:function:user-crud-api-dev-listUsers:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-user-crud-api-dev-ListUsersLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "UpdateUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:810731469208:function:user-crud-api-dev-updateUser:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-user-crud-api-dev-UpdateUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "CreateUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:810731469208:function:user-crud-api-dev-createUser:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-user-crud-api-dev-CreateUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "GetUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:810731469208:function:user-crud-api-dev-getUser:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-user-crud-api-dev-GetUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ServiceEndpoint",
+        "OutputValue": "https://8shub880y0.execute-api.us-east-1.amazonaws.com/dev",
+        "Description": "URL of the service endpoint",
+        "ExportName": "sls-user-crud-api-dev-ServiceEndpoint"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-us-east-1-17c21ebb-1d88",
+        "ExportName": "sls-user-crud-api-dev-ServerlessDeploymentBucketName"
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+service: user-crud-api
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 30
+  environment:
+    USERS_TABLE: ${self:service}-${self:provider.stage}-users
+    STAGE: ${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}/index/*"
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    noPrependStageInUrl: true  # Remove /dev prefix for local development
+    cors:
+      origin: '*'
+      headers:
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+
+functions:
+  createUser:
+    handler: src/handlers/createUser.handler
+    events:
+      - http:
+          path: users
+          method: post
+          cors: true
+
+  getUser:
+    handler: src/handlers/getUser.handler
+    events:
+      - http:
+          path: users/{UserID}
+          method: get
+          cors: true
+
+  listUsers:
+    handler: src/handlers/listUsers.handler
+    events:
+      - http:
+          path: users
+          method: get
+          cors: true
+
+  updateUser:
+    handler: src/handlers/updateUser.handler
+    events:
+      - http:
+          path: users/{UserID}
+          method: put
+          cors: true
+
+  deleteUser:
+    handler: src/handlers/deleteUser.handler
+    events:
+      - http:
+          path: users/{UserID}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: UserID
+            AttributeType: S
+          - AttributeName: Email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: UserID
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: Email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
